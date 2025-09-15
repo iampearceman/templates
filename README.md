@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## REST API Documentation
 
-## Getting Started
+This service exposes a small REST API for listing and retrieving Novu workflows. It is built with Next.js App Router. All responses are JSON and include a `success` field.
 
-First, run the development server:
+Base URL when running locally: `http://localhost:3000`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Service Info
+
+- **Method**: GET
+- **Path**: `/api`
+- **Description**: Returns service metadata and available endpoints.
+
+Response example:
+
+```json
+{
+  "success": true,
+  "service": "workflow-templates",
+  "version": "0.1.0",
+  "endpoints": [
+    { "method": "GET", "path": "/api", "description": "Service info" },
+    { "method": "GET", "path": "/api/workflows", "description": "List workflows" },
+    { "method": "GET", "path": "/api/workflows/:workflowId", "description": "Get workflow by ID" }
+  ]
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### List Workflows
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Method**: GET
+- **Path**: `/api/workflows`
+- **Query params**:
+  - **refresh** (optional): `1` to bypass cache and refresh.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Response example:
 
-## Learn More
+```json
+{
+  "success": true,
+  "data": {
+    "data": [
+      {
+        "id": "abc123",
+        "workflowId": "abc123",
+        "name": "Welcome Flow",
+        "active": true,
+        "description": "Sends a welcome sequence",
+        "tags": ["onboarding"],
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "updatedAt": "2024-02-01T00:00:00.000Z"
+      }
+    ],
+    "totalCount": 1,
+    "page": 0,
+    "pageSize": 50
+  }
+}
+```
 
-To learn more about Next.js, take a look at the following resources:
+Headers:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `X-Cache`: `HIT` | `MISS` | `MISS-REFRESH` | `HIT-STALE-INFLIGHT`
+- `X-Cache-Key`: Cache key for the list resource
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Get Workflow By ID
 
-## Deploy on Vercel
+- **Method**: GET
+- **Path**: `/api/workflows/:workflowId`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Response example:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```json
+{
+  "success": true,
+  "data": {
+    "id": "abc123",
+    "workflowId": "abc123",
+    "name": "Welcome Flow",
+    "active": true,
+    "description": "Sends a welcome sequence",
+    "tags": ["onboarding"],
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-02-01T00:00:00.000Z"
+  }
+}
+```
+
+### Error Responses
+
+Errors follow this shape and use appropriate HTTP status codes:
+
+```json
+{
+  "success": false,
+  "error": "Failed to fetch workflows",
+  "details": "Optional details from upstream provider"
+}
+```
+
+### Authentication
+
+Set the Novu API key in environment variables:
+
+```bash
+export NOVU_SECRET_KEY=your_novu_api_key
+```
+
+### Running Locally
+
+```bash
+pnpm dev
+# build:
+pnpm build
+# production serve:
+pnpm start
+```
+
+Open `http://localhost:3000/api` to view service info.
+
+### Notes
+
+- Caching: The list and detail endpoints use an in-memory cache with TTL controlled via `WORKFLOWS_CACHE_TTL_SECONDS` (default 300s).
+- The UI at `/` consumes the same API (`/api/workflows`).

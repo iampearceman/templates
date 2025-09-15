@@ -1,19 +1,12 @@
-import { NextResponse } from 'next/server';
-
-interface RouteContext {
-  params: { workflowId: string };
-}
+import { NextResponse, NextRequest } from 'next/server';
+import { getWorkflowById } from '@/lib/workflows';
 
 export async function GET(
-  _request: Request,
-  context: RouteContext
+  _request: NextRequest,
+  { params }: { params: Promise<{ workflowId: string }> }
 ) {
   try {
-    if (!process.env.NOVU_SECRET_KEY) {
-      throw new Error('NOVU_SECRET_KEY environment variable is not set');
-    }
-
-    const workflowId = context.params?.workflowId;
+    const { workflowId } = await params;
     if (!workflowId) {
       return NextResponse.json(
         { success: false, error: 'Missing workflowId in path' },
@@ -21,41 +14,17 @@ export async function GET(
       );
     }
 
-    const url = new URL(`https://api.novu.co/v2/workflows/${encodeURIComponent(workflowId)}`);
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': `ApiKey ${process.env.NOVU_SECRET_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Failed to fetch workflow',
-          details: `Status ${response.status}: ${errorText}`,
-        },
-        { status: response.status }
-      );
-    }
-
-    const result = await response.json();
-
-    return NextResponse.json({ success: true, data: result });
+    const workflow = await getWorkflowById(workflowId);
+    return NextResponse.json({ success: true, data: workflow });
   } catch (error) {
     console.error('Error fetching workflow details:', error);
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to fetch workflow',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: (error as Error | undefined)?.message ?? 'Failed to fetch workflow',
+        details: (error as { details?: string } | undefined)?.details ?? (error instanceof Error ? undefined : 'Unknown error'),
       },
-      { status: 500 }
+      { status: (error as { status?: number } | undefined)?.status ?? 500 }
     );
   }
 }

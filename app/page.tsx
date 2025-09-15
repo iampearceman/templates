@@ -9,7 +9,9 @@ interface Workflow {
   active: boolean;
   createdAt: string;
   updatedAt: string;
-  [key: string]: any;
+  workflowId?: string;
+  tags?: string[];
+  [key: string]: unknown;
 }
 
 interface ApiResponse {
@@ -35,7 +37,7 @@ export default function Home() {
       setIsLoading(true);
       setErrorMessage(null);
 
-      const endpoint = useRefresh ? '/api?refresh=1' : '/api';
+      const endpoint = useRefresh ? '/api/workflows?refresh=1' : '/api/workflows';
       const response = await fetch(endpoint);
       const result: ApiResponse = await response.json();
 
@@ -63,7 +65,7 @@ export default function Home() {
   const workflowsByTag = useMemo(() => {
     const groups: Record<string, Workflow[]> = {};
     for (const wf of workflows) {
-      const tags: string[] = Array.isArray((wf as any).tags) ? (wf as any).tags : ['untagged'];
+      const tags: string[] = Array.isArray(wf.tags) ? wf.tags : ['untagged'];
       if (tags.length === 0) {
         const key = 'untagged';
         groups[key] = groups[key] || [];
@@ -125,7 +127,7 @@ export default function Home() {
                 <h2 className="text-xl font-semibold mb-4 capitalize">{tagKey}</h2>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {workflowsByTag[tagKey].map((workflow) => {
-                    const workflowId = (workflow as any).workflowId || workflow.id;
+                    const workflowId = workflow.workflowId || workflow.id;
 
                     return (
                       <div
@@ -162,8 +164,8 @@ export default function Home() {
                           </div>
                           <div>
                             <span className="font-medium">Tags:</span>{' '}
-                            {Array.isArray((workflow as any).tags) && (workflow as any).tags.length > 0
-                              ? (workflow as any).tags.join(', ')
+                            {Array.isArray(workflow.tags) && workflow.tags.length > 0
+                              ? workflow.tags.join(', ')
                               : 'untagged'}
                           </div>
                           <div>
