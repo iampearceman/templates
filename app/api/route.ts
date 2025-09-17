@@ -8,7 +8,7 @@ export async function OPTIONS(request: NextRequest) {
   return handleCorsPreflight(request) || new NextResponse(null, { status: 200 });
 }
 
-export const GET = withCors(async function(_request: NextRequest) {
+export const GET = withCors(async function() {
   type PackageMeta = { name?: string; version?: string };
   const pkg = packageJson as PackageMeta;
   const version = pkg.version ?? '0.0.0';

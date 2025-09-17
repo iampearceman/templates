@@ -97,8 +97,8 @@ export function addCorsHeaders(response: NextResponse, origin: string | null): N
 /**
  * Middleware function to handle CORS for API routes
  */
-export function withCors(handler: (request: NextRequest, ...args: any[]) => Promise<NextResponse>) {
-  return async (request: NextRequest, ...args: any[]): Promise<NextResponse> => {
+export function withCors(handler: (request: NextRequest, ...args: unknown[]) => Promise<NextResponse>) {
+  return async (request: NextRequest, ...args: unknown[]): Promise<NextResponse> => {
     const origin = request.headers.get('origin');
     
     // Handle preflight requests
