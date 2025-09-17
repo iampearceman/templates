@@ -26,7 +26,7 @@ export class HttpError extends Error {
   }
 }
 
-const WORKFLOWS_CACHE_TTL_MS = parseInt(process.env.WORKFLOWS_CACHE_TTL_SECONDS || '300', 10) * 1000;
+const WORKFLOWS_CACHE_TTL_MS = parseInt(process.env.WORKFLOWS_CACHE_TTL_SECONDS || '7200', 10) * 1000;
 const FULL_WORKFLOWS_CACHE_KEY = 'full-workflows:page=0:pageSize=50';
 
 const workflowsListCache: Map<string, CacheEntry<WorkflowsListPayload>> = new Map();
