@@ -121,3 +121,4 @@ Open `http://localhost:3000/api` to view service info.
 
 - Caching: The list and detail endpoints use an in-memory cache with TTL controlled via `WORKFLOWS_CACHE_TTL_SECONDS` (default 300s).
 - The UI at `/` consumes the same API (`/api/workflows`).
+# CORS Configuration Updated
