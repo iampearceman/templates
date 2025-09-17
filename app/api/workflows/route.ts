@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getWorkflowsList } from '@/lib/workflows';
+import { withCors, handleCorsPreflight } from '@/lib/cors';
 
-export async function GET(request: NextRequest) {
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPreflight(request) || new NextResponse(null, { status: 200 });
+}
+
+export const GET = withCors(async function(request: NextRequest) {
   try {
     const requestUrl = new URL(request.url);
     const isForceRefresh = requestUrl.searchParams.get('refresh') === '1';
@@ -32,6 +37,6 @@ export async function GET(request: NextRequest) {
       { status }
     );
   }
-}
+});
 
 

@@ -1,7 +1,12 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getWorkflowById } from '@/lib/workflows';
+import { withCors, handleCorsPreflight } from '@/lib/cors';
 
-export async function GET(
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPreflight(request) || new NextResponse(null, { status: 200 });
+}
+
+export const GET = withCors(async function(
   _request: NextRequest,
   { params }: { params: Promise<{ workflowId: string }> }
 ) {
@@ -27,6 +32,6 @@ export async function GET(
       { status: (error as { status?: number } | undefined)?.status ?? 500 }
     );
   }
-}
+});
 
 
