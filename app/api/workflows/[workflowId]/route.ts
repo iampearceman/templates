@@ -11,10 +11,10 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withCors(async function(
   _request: NextRequest,
-  { params }: { params: { workflowId: string } }
+  { params }: { params: Promise<{ workflowId: string }> }
 ) {
   try {
-    const { workflowId } = params;
+    const { workflowId } = await params;
     if (!workflowId) {
       return NextResponse.json(
         { success: false, error: 'Missing workflowId in path' },
