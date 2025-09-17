@@ -185,6 +185,8 @@ export async function getWorkflowsList(isForceRefresh: boolean): Promise<Workflo
         'Content-Type': 'application/json',
       },
       cache: 'no-store',
+      // Abort if Novu API is slow to respond
+      signal: (() => { const c = new AbortController(); setTimeout(() => c.abort(), 15000); return c.signal; })(),
     });
 
     if (!listResponse.ok) {
@@ -217,6 +219,7 @@ export async function getWorkflowsList(isForceRefresh: boolean): Promise<Workflo
             'Content-Type': 'application/json',
           },
           cache: 'no-store',
+          signal: (() => { const c = new AbortController(); setTimeout(() => c.abort(), 15000); return c.signal; })(),
         });
         if (!detailResponse.ok) {
           const errText = await detailResponse.text();

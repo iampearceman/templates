@@ -6,12 +6,15 @@ export async function OPTIONS(request: NextRequest) {
   return handleCorsPreflight(request) || new NextResponse(null, { status: 200 });
 }
 
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 export const GET = withCors(async function(
   _request: NextRequest,
-  { params }: { params: Promise<{ workflowId: string }> }
+  { params }: { params: { workflowId: string } }
 ) {
   try {
-    const { workflowId } = await params;
+    const { workflowId } = params;
     if (!workflowId) {
       return NextResponse.json(
         { success: false, error: 'Missing workflowId in path' },

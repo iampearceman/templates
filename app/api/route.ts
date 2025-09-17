@@ -4,6 +4,9 @@ import { withCors, handleCorsPreflight } from '@/lib/cors';
 
 // Reduced to a simple service info route. Heavy logic moved to lib and dedicated endpoints.
 
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 export async function OPTIONS(request: NextRequest) {
   return handleCorsPreflight(request) || new NextResponse(null, { status: 200 });
 }

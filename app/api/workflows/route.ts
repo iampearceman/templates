@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getWorkflowsList } from '@/lib/workflows';
 import { withCors, handleCorsPreflight } from '@/lib/cors';
 
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 export async function OPTIONS(request: NextRequest) {
   return handleCorsPreflight(request) || new NextResponse(null, { status: 200 });
 }

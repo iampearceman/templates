@@ -31,16 +31,16 @@ export const corsConfig = {
   origin: ALLOWED_ORIGINS,
   methods: ALLOWED_METHODS,
   allowedHeaders: ALLOWED_HEADERS,
-  credentials: true, // Allow cookies and authorization headers
+  credentials: false, // Wildcard CORS cannot be used with credentials
   maxAge: 86400, // Cache preflight response for 24 hours
 };
 
 /**
  * Validates if the request origin is allowed
  */
-export function isOriginAllowed(origin: string | null): boolean {
-  if (!origin) return false;
-  return ALLOWED_ORIGINS.includes(origin);
+export function isOriginAllowed(_origin: string | null): boolean {
+  // In wildcard mode, all origins are allowed
+  return true;
 }
 
 /**
@@ -51,15 +51,10 @@ export function getCorsHeaders(origin: string | null): Record<string, string> {
     'Access-Control-Allow-Methods': ALLOWED_METHODS.join(', '),
     'Access-Control-Allow-Headers': ALLOWED_HEADERS.join(', '),
     'Access-Control-Max-Age': corsConfig.maxAge.toString(),
+    // Expose custom headers used by clients
+    'Access-Control-Expose-Headers': 'X-Cache, X-Cache-Key',
+    'Access-Control-Allow-Origin': '*',
   };
-
-  if (origin && isOriginAllowed(origin)) {
-    headers['Access-Control-Allow-Origin'] = origin;
-    headers['Access-Control-Allow-Credentials'] = 'true';
-  } else {
-    // For requests without origin or from disallowed origins, don't set Access-Control-Allow-Origin
-    // This prevents the browser from using the response
-  }
 
   return headers;
 }
@@ -68,17 +63,8 @@ export function getCorsHeaders(origin: string | null): Record<string, string> {
  * Handles CORS preflight requests (OPTIONS)
  */
 export function handleCorsPreflight(request: NextRequest): NextResponse | null {
-  const origin = request.headers.get('origin');
-  
-  if (!isOriginAllowed(origin)) {
-    return new NextResponse(null, { status: 403 });
-  }
-
-  const headers = getCorsHeaders(origin);
-  return new NextResponse(null, { 
-    status: 200, 
-    headers 
-  });
+  const headers = getCorsHeaders(request.headers.get('origin'));
+  return new NextResponse(null, { status: 200, headers });
 }
 
 /**
@@ -109,20 +95,6 @@ export function withCors<T extends unknown[] = unknown[]>(
       if (preflightResponse) {
         return preflightResponse;
       }
-    }
-
-    // Check if origin is allowed for actual requests
-    if (origin && !isOriginAllowed(origin)) {
-      return new NextResponse(
-        JSON.stringify({ 
-          success: false, 
-          error: 'CORS policy violation: Origin not allowed' 
-        }),
-        { 
-          status: 403,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
     }
 
     // Execute the original handler
